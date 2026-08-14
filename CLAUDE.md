@@ -14,7 +14,7 @@
 프론트엔드는 Next.js(별도 레포)이며 **모든 세션 상태를 브라우저 LocalStorage에 저장**합니다.
 따라서 이 서버는 **상태를 저장하지 않습니다(stateless)**.
 
-구현 명세는 `BACKEND_SPEC_v3.md`, 프론트와의 계약은 `API.md` 입니다.
+구현 명세는 `BACKEND_SPEC_v4.md`, 프론트와의 계약은 `API.md` 입니다.
 두 문서가 어긋나면 `API.md` 를 따릅니다.
 
 ## 절대 규칙
