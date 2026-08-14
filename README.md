@@ -139,6 +139,12 @@ prompts/ 는 이미지에 포함되어 `/prompts` 에서 로드됩니다(`PROMPT
 
 상세 요청/응답/에러는 [`docs/API.md`](docs/API.md).
 
+## 문서
+
+- [`docs/API.md`](docs/API.md) — 프론트 연동용 API 레퍼런스
+- [`docs/CODE_WALKTHROUGH.md`](docs/CODE_WALKTHROUGH.md) — 코드 읽는 순서 + 예상 Q&A
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — 이미지 빌드 → 레지스트리 → 클라우드/K8s 배포
+
 ---
 
 ## 개발
