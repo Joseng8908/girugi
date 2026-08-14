@@ -20,35 +20,36 @@
 
 ### 요청 흐름
 
+```mermaid
+flowchart TD
+    FE["Next.js 프론트 · Vercel<br/>세션 상태 = LocalStorage"]
+    FE -->|"JSON over HTTPS"| MW["미들웨어 체인<br/>Recover → Logger → CORS → MaxBytes 1MB"]
+
+    MW --> CHAT["POST /api/chat"]
+    MW --> REPORT["POST /api/report"]
+    MW --> SLOG["POST /api/session-log"]
+    MW --> HEALTH["GET /healthz"]
+
+    CHAT --> PROMPT["prompt 로더<br/>prompts/*.md"]
+    REPORT --> PROMPT
+    PROMPT --> LLM["llm.Client 인터페이스<br/>Anthropic · Fake"]
+    LLM -->|"x-api-key"| ANTH["Anthropic Messages API"]
+    ANTH --> JSONX["jsonx.Extract<br/>코드펜스·앞평문 제거"]
+
+    JSONX -->|"파싱 성공"| DISC["disclose 화이트리스트 필터<br/>domain"]
+    JSONX -.->|"파싱 실패"| FB["폴백<br/>chat: unknown · report: fallback.json"]
+    DISC --> RESP["200 JSON 응답"]
+    FB --> RESP
+
+    SLOG --> STDOUT["stdout JSON 로그<br/>DB 없음"]
+    HEALTH --> OK200["200 빈 바디"]
+
+    classDef store fill:#eee,stroke:#999,color:#333;
+    class FE,STDOUT store;
 ```
-        Next.js (Vercel, LocalStorage에 세션 상태 보관)
-                        │  JSON over HTTPS
-                        ▼
-┌──────────────────────────────────────────────────────────┐
-│  net/http mux (Go 1.22 메서드 패턴 라우팅)                 │
-│                                                            │
-│  middleware:  Recover → Logger → CORS → MaxBytes(1MB)      │
-│                        │                                   │
-│   ┌────────────────────┼───────────────────────┐          │
-│   ▼                    ▼                        ▼          │
-│ /api/chat          /api/report          /api/session-log  │
-│   │                    │                        │          │
-│   │ buildUserTurn      │ findings→문장          └─ stdout  │
-│   │ disclose 필터      │ 상한/폴백                  JSON 로깅│
-│   ▼                    ▼                                   │
-│  ┌──────────┐   ┌──────────────┐                          │
-│  │ prompt   │   │ jsonx.Extract│  (코드펜스·앞평문 제거)   │
-│  │ (파일로드)│   └──────┬───────┘                          │
-│  └────┬─────┘          │ 파싱 실패 시                      │
-│       ▼                ▼                                   │
-│  ┌─────────────────────────────┐    ┌──────────────────┐  │
-│  │ llm.Client (interface)      │    │ report.Fallback  │  │
-│  │  ├ Anthropic (net/http 직접)│    │ (fallback.json)  │  │
-│  │  └ Fake (테스트)            │    └──────────────────┘  │
-│  └──────────┬──────────────────┘                          │
-└─────────────┼─────────────────────────────────────────────┘
-              ▼  Anthropic Messages API (x-api-key)
-```
+
+> 핵심: 모든 LLM 응답은 `jsonx.Extract` 를 거치고, 파싱 실패해도 **500이 아니라 200 + 폴백**.
+> `disclose` 는 프롬프트를 믿지 않고 `domain` 화이트리스트로 코드에서 필터링.
 
 ### 디렉토리 구조
 
