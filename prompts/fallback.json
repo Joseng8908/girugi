@@ -1,0 +1,35 @@
+{
+  "_note": "draft — 문구는 AI/기획이 확정 (BACKEND_SPEC_v4 §12). code는 API.md finding 표와 1:1.",
+
+  "asked_capability_before_final": "최종본 제출 전에 사내 생산 가능 여부를 확인해 재작업을 줄였습니다.",
+  "vendor_compared_three": "외주 업체 세 곳을 비교해 근거 있는 선정을 진행했습니다.",
+  "limit_sample_missing_in_draft": "초안에 한도 견본 판정표를 별첨하지 않아 재요청이 발생했습니다.",
+  "spec_field_missing": "시방서의 필수 항목 일부가 빠져 있었습니다.",
+  "vendor_criteria_incomplete": "납기·수량·단가 중 일부만 비교해 업체 기준이 완전하지 않았습니다.",
+  "revisited_after_branch": "분기 이후 앞 단계로 되돌아가 작업을 다시 진행했습니다.",
+  "concept_abandoned": "목재 소재를 포기하는 방향을 선택했습니다.",
+  "capability_never_asked": "설계팀에 사내 생산 가능 여부를 확인하지 않았습니다.",
+  "budget_never_asked": "목표 예산을 확인하지 않아 비용 관점의 검토가 빠졌습니다.",
+  "deadline_margin_ignored": "발주 일정의 여유를 고려하지 않았습니다.",
+
+  "manufacturing_method_considered": "성형 제약을 고려해 제작 가능한 방향으로 선택했습니다.",
+  "cost_alternative_provided": "비용이 늘어나는 선택에 절감 대안을 함께 제시했습니다.",
+  "core_intent_kept": "최종 요약에서도 처음의 핵심 의도를 유지했습니다.",
+  "alternative_proposed_to_engineering": "설계 제약에 대해 스스로 대안을 제시했습니다.",
+  "agreement_confirmed": "협상 마지막에 합의안을 확정했습니다.",
+  "cost_alternative_missing": "비용이 늘어나는 선택을 하면서 절감 대안을 제시하지 않았습니다.",
+  "core_intent_abandoned": "최종 의도 요약에서 처음의 벨트라인 방향이 드러나지 않았습니다.",
+  "design_unilaterally_insisted": "대안 없이 원안 유지만 요구했습니다.",
+  "agreement_deferred": "협상 마지막에 합의를 미루고 재검토를 요청했습니다.",
+  "revisited_to_senior": "협상 마지막에 선배에게 재검토를 요청했습니다.",
+  "reasoning_missing_round1": "1차 협상에서 선택 근거를 남기지 않았습니다.",
+  "reasoning_missing_round2": "2차 협상에서 선택 근거를 남기지 않았습니다.",
+
+  "_s1_default": {
+    "initial_direction": "프로젝트 초기에 설정한 방향과 의도를 바탕으로 작업을 시작했습니다.",
+    "work_journey": "관계자와 대화하며 제약을 확인하고 여러 차례 방향을 조정했습니다.",
+    "key_changes": "협상 과정에서 초안의 구조와 표현을 일부 수정했습니다.",
+    "competency_record": "제약을 확인하고 대안을 검토하는 과정을 스스로 수행했습니다.",
+    "job_meaning": "이번 체험을 통해 제품 디자인 협업의 흐름을 경험했습니다."
+  }
+}

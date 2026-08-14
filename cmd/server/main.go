@@ -16,6 +16,8 @@ import (
 	"girugi/internal/httpx"
 	"girugi/internal/llm"
 	"girugi/internal/prompt"
+	"girugi/internal/report"
+	"girugi/internal/sessionlog"
 )
 
 func main() {
@@ -24,11 +26,20 @@ func main() {
 	llmClient := llm.NewAnthropic(cfg.APIKey, cfg.Model)
 	prompts := prompt.New(cfg.PromptsDir)
 
+	// Report fallback sentences are loaded once at startup. A missing file must
+	// not take down the server, so we log and continue with an empty fallback.
+	fallback, err := report.LoadFallback(cfg.PromptsDir)
+	if err != nil {
+		slog.Warn("report fallback load failed, continuing with empty fallback", "err", err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK) // 200 + empty body (API.md)
 	})
 	mux.Handle("POST /api/chat", &chat.Handler{LLM: llmClient, Prompts: prompts})
+	mux.Handle("POST /api/report", &report.Handler{LLM: llmClient, Prompts: prompts, Fallback: fallback})
+	mux.Handle("POST /api/session-log", &sessionlog.Handler{})
 
 	handler := httpx.Chain(mux,
 		httpx.Recover,
