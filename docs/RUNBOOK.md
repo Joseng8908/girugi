@@ -32,7 +32,7 @@ go run ./cmd/server &        # 또는 docker run (아래 6번)
 BASE_URL=http://localhost:8080 ./scripts/smoke.sh
 ```
 기대치:
-- `RESULT PASS=15 WARN=0 FAIL=0` 이면 완벽 (전 페르소나 JSON 준수 + disclose 정상)
+- `RESULT PASS=13 WARN=0 FAIL=0` 이면 완벽 (전 페르소나 JSON 준수 + disclose 정상)
 - `WARN=503` → 키/URL 확인
 - `WARN=폴백` → 해당 페르소나 프롬프트가 JSON 형식 안 지킴 → AI 파트에 피드백(이슈 재오픈)
 - `FAIL` → 라우팅/서버 오류
