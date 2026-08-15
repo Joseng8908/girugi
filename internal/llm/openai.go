@@ -20,8 +20,13 @@ type OpenAI struct {
 	http    *http.Client
 }
 
-func NewOpenAI(apiKey, model string) *OpenAI {
-	return &OpenAI{apiKey: apiKey, model: model, baseURL: openAIURL, http: &http.Client{}}
+// NewOpenAI builds an OpenAI client. baseURL is for OpenAI-compatible endpoints
+// (proxy/gateway given by the AI part); empty falls back to the official API.
+func NewOpenAI(apiKey, model, baseURL string) *OpenAI {
+	if baseURL == "" {
+		baseURL = openAIURL
+	}
+	return &OpenAI{apiKey: apiKey, model: model, baseURL: baseURL, http: &http.Client{}}
 }
 
 type openAIReq struct {

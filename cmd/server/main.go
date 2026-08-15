@@ -30,7 +30,7 @@ func main() {
 	case "anthropic":
 		llmClient = llm.NewAnthropic(cfg.AnthropicKey, cfg.Model)
 	default:
-		llmClient = llm.NewOpenAI(cfg.OpenAIKey, cfg.Model)
+		llmClient = llm.NewOpenAI(cfg.OpenAIKey, cfg.Model, cfg.OpenAIBaseURL)
 	}
 	hasKey := cfg.OpenAIKey != ""
 	if cfg.Provider == "anthropic" {

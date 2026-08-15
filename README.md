@@ -124,6 +124,7 @@ prompts/ 는 이미지에 포함되어 `/prompts` 에서 로드됩니다(`PROMPT
 | `HOST` | (전체) | X | 바인드 주소. 비우면 모든 인터페이스(컨테이너 기본) |
 | `LLM_PROVIDER` | `openai` | X | `openai` \| `anthropic`. 프롬프트가 GPT-4o 튜닝이라 기본 openai |
 | `OPENAI_API_KEY` | — | X* | provider=openai일 때 필요. 없으면 LLM 호출만 503 |
+| `OPENAI_BASE_URL` | (공식) | X | OpenAI 호환 커스텀 엔드포인트(프록시/게이트웨이)일 때만 |
 | `ANTHROPIC_API_KEY` | — | X* | provider=anthropic일 때 필요 |
 | `MODEL` | provider별 | X | 미설정 시 openai→`gpt-4o`, anthropic→`claude-haiku-4-5-20251001` |
 | `ALLOWED_ORIGIN` | `*` | O(프로덕션) | CORS 허용 오리진. 프로덕션은 실제 오리진 지정 |

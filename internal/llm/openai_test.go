@@ -44,7 +44,7 @@ func TestOpenAIComplete(t *testing.T) {
 }
 
 func TestOpenAINoKey(t *testing.T) {
-	c := NewOpenAI("", "gpt-4o")
+	c := NewOpenAI("", "gpt-4o", "")
 	if _, err := c.Complete(context.Background(), "s", nil); err == nil {
 		t.Fatal("expected error without api key")
 	}

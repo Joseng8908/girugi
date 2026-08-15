@@ -9,6 +9,7 @@ type Config struct {
 	Port          string
 	Provider      string // "openai" (default) | "anthropic"
 	OpenAIKey     string
+	OpenAIBaseURL string // optional: custom OpenAI-compatible endpoint
 	AnthropicKey  string
 	Model         string
 	AllowedOrigin string
@@ -22,6 +23,7 @@ func Load() Config {
 		Port:          envOr("PORT", "8080"),
 		Provider:      provider,
 		OpenAIKey:     os.Getenv("OPENAI_API_KEY"),
+		OpenAIBaseURL: os.Getenv("OPENAI_BASE_URL"),
 		AnthropicKey:  os.Getenv("ANTHROPIC_API_KEY"),
 		Model:         modelFor(provider),
 		AllowedOrigin: envOr("ALLOWED_ORIGIN", "*"), // "*" for local dev; set the real origin in prod
