@@ -30,9 +30,17 @@ func NewOpenAI(apiKey, model, baseURL string) *OpenAI {
 }
 
 type openAIReq struct {
-	Model     string    `json:"model"`
-	Messages  []Message `json:"messages"`
-	MaxTokens int       `json:"max_tokens"`
+	Model          string          `json:"model"`
+	Messages       []Message       `json:"messages"`
+	MaxTokens      int             `json:"max_tokens"`
+	ResponseFormat *responseFormat `json:"response_format,omitempty"`
+}
+
+// responseFormat forces the model to emit a valid JSON object at the API level
+// (json_object mode). This removes the "returns plain text" failure mode that no
+// amount of prompt tuning fully fixes; all our prompts already demand JSON.
+type responseFormat struct {
+	Type string `json:"type"` // "json_object"
 }
 
 type openAIRes struct {
@@ -56,7 +64,12 @@ func (o *OpenAI) Complete(ctx context.Context, system string, msgs []Message) (s
 	}
 	all = append(all, msgs...)
 
-	body, err := json.Marshal(openAIReq{Model: o.model, Messages: all, MaxTokens: maxTokens})
+	body, err := json.Marshal(openAIReq{
+		Model:          o.model,
+		Messages:       all,
+		MaxTokens:      maxTokens,
+		ResponseFormat: &responseFormat{Type: "json_object"},
+	})
 	if err != nil {
 		return "", fmt.Errorf("llm: marshal request: %w", err)
 	}

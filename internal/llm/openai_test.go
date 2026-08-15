@@ -35,6 +35,9 @@ func TestOpenAIComplete(t *testing.T) {
 	if got.Model != "gpt-4o" {
 		t.Fatalf("model = %q", got.Model)
 	}
+	if got.ResponseFormat == nil || got.ResponseFormat.Type != "json_object" {
+		t.Fatalf("response_format = %+v, want json_object", got.ResponseFormat)
+	}
 	if len(got.Messages) != 2 || got.Messages[0].Role != "system" || got.Messages[0].Content != "SYS" {
 		t.Fatalf("system message not prepended: %+v", got.Messages)
 	}

@@ -18,7 +18,8 @@
 가장 중요한 seam.
 - `Client` 인터페이스 = `Complete(ctx, system, msgs)` 하나
 - `OpenAI`(`openai.go`) = **기본 provider**. `net/http` 로 Chat Completions 직접 호출.
-  system을 첫 메시지(role:"system")로 넣음.
+  system을 첫 메시지(role:"system")로 넣음. **`response_format=json_object`로 유효 JSON을
+  API가 강제** → 모델이 평문을 뱉는 폴백이 사실상 0 (프롬프트 준수에 의존 안 함).
 - `Anthropic`(`client.go`) = 대체 provider. Messages API(system은 별도 필드).
 - 둘 다 SDK 없이 표준 라이브러리. 20초 타임아웃 × 재시도 1회. `main.go` 가 `LLM_PROVIDER` 로 선택.
 - `Fake` = 테스트용. 정한 문자열 반환 + 호출 인자 기록
