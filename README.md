@@ -98,8 +98,9 @@ flowchart TD
 # API 키 없이도 기동됨 (/healthz 200, LLM 호출만 503, report는 폴백 200)
 go run ./cmd/server
 
-# 실제 LLM 사용
-ANTHROPIC_API_KEY=sk-ant-... ALLOWED_ORIGIN=http://localhost:3000 go run ./cmd/server
+# 실제 LLM 사용 (기본 provider = openai)
+OPENAI_API_KEY=sk-... ALLOWED_ORIGIN=http://localhost:3000 go run ./cmd/server
+# Anthropic로 전환: LLM_PROVIDER=anthropic ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 ### Docker
@@ -107,7 +108,7 @@ ANTHROPIC_API_KEY=sk-ant-... ALLOWED_ORIGIN=http://localhost:3000 go run ./cmd/s
 ```bash
 docker build -t girugi:dev .
 docker run -p 8080:8080 \
-  -e ANTHROPIC_API_KEY=sk-ant-... \
+  -e OPENAI_API_KEY=sk-... \
   -e ALLOWED_ORIGIN=https://your-frontend \
   girugi:dev
 # 포트 변경: -e PORT=9000 -p 9000:9000 (이미지 재빌드 불필요)
@@ -121,8 +122,10 @@ prompts/ 는 이미지에 포함되어 `/prompts` 에서 로드됩니다(`PROMPT
 |---|---|---|---|
 | `PORT` | `8080` | X | 바인드 포트 |
 | `HOST` | (전체) | X | 바인드 주소. 비우면 모든 인터페이스(컨테이너 기본) |
-| `ANTHROPIC_API_KEY` | — | X* | 없으면 LLM 호출만 503 |
-| `MODEL` | `claude-haiku-4-5-20251001` | X | 프롬프트가 GPT-4o 튜닝이라 준수율 확인 후 조정 |
+| `LLM_PROVIDER` | `openai` | X | `openai` \| `anthropic`. 프롬프트가 GPT-4o 튜닝이라 기본 openai |
+| `OPENAI_API_KEY` | — | X* | provider=openai일 때 필요. 없으면 LLM 호출만 503 |
+| `ANTHROPIC_API_KEY` | — | X* | provider=anthropic일 때 필요 |
+| `MODEL` | provider별 | X | 미설정 시 openai→`gpt-4o`, anthropic→`claude-haiku-4-5-20251001` |
 | `ALLOWED_ORIGIN` | `*` | O(프로덕션) | CORS 허용 오리진. 프로덕션은 실제 오리진 지정 |
 | `PROMPTS_DIR` | `./prompts` | X | 프롬프트 파일 경로 |
 

@@ -23,7 +23,19 @@ import (
 func main() {
 	cfg := config.Load()
 
-	llmClient := llm.NewAnthropic(cfg.APIKey, cfg.Model)
+	// LLM provider is selectable via env (default OpenAI — prompts are tuned on
+	// GPT-4o). Both talk through the same llm.Client interface.
+	var llmClient llm.Client
+	switch cfg.Provider {
+	case "anthropic":
+		llmClient = llm.NewAnthropic(cfg.AnthropicKey, cfg.Model)
+	default:
+		llmClient = llm.NewOpenAI(cfg.OpenAIKey, cfg.Model)
+	}
+	hasKey := cfg.OpenAIKey != ""
+	if cfg.Provider == "anthropic" {
+		hasKey = cfg.AnthropicKey != ""
+	}
 	prompts := prompt.New(cfg.PromptsDir)
 
 	// Report fallback sentences are loaded once at startup. A missing file must
@@ -65,7 +77,7 @@ func main() {
 	defer stop()
 
 	go func() {
-		slog.Info("server starting", "addr", srv.Addr, "model", cfg.Model, "hasKey", cfg.APIKey != "")
+		slog.Info("server starting", "addr", srv.Addr, "provider", cfg.Provider, "model", cfg.Model, "hasKey", hasKey)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("server failed", "err", err)
 			os.Exit(1)

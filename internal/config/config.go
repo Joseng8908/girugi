@@ -7,21 +7,37 @@ import "os"
 type Config struct {
 	Host          string
 	Port          string
-	APIKey        string
+	Provider      string // "openai" (default) | "anthropic"
+	OpenAIKey     string
+	AnthropicKey  string
 	Model         string
 	AllowedOrigin string
 	PromptsDir    string
 }
 
 func Load() Config {
+	provider := envOr("LLM_PROVIDER", "openai") // AI part's prompts are tuned on GPT-4o
 	return Config{
 		Host:          os.Getenv("HOST"), // empty = bind all interfaces (correct for containers)
 		Port:          envOr("PORT", "8080"),
-		APIKey:        os.Getenv("ANTHROPIC_API_KEY"),
-		Model:         envOr("MODEL", "claude-haiku-4-5-20251001"),
+		Provider:      provider,
+		OpenAIKey:     os.Getenv("OPENAI_API_KEY"),
+		AnthropicKey:  os.Getenv("ANTHROPIC_API_KEY"),
+		Model:         modelFor(provider),
 		AllowedOrigin: envOr("ALLOWED_ORIGIN", "*"), // "*" for local dev; set the real origin in prod
 		PromptsDir:    envOr("PROMPTS_DIR", "./prompts"),
 	}
+}
+
+// modelFor returns MODEL if set, else a provider-appropriate default.
+func modelFor(provider string) string {
+	if m := os.Getenv("MODEL"); m != "" {
+		return m
+	}
+	if provider == "anthropic" {
+		return "claude-haiku-4-5-20251001"
+	}
+	return "gpt-4o"
 }
 
 func envOr(key, def string) string {

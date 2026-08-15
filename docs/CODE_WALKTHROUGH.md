@@ -14,13 +14,17 @@
 
 > 핵심: LLM이 없는 키를 지어내도 코드가 화이트리스트로 잘라낸다. 프롬프트 준수를 안 믿는다(CLAUDE.md 규칙 8).
 
-## 2. 외부 경계 — `internal/llm/client.go` + `fake.go`
+## 2. 외부 경계 — `internal/llm/` (`client.go` · `openai.go` · `fake.go`)
 가장 중요한 seam.
 - `Client` 인터페이스 = `Complete(ctx, system, msgs)` 하나
-- `Anthropic` = `net/http` 로 Messages API 직접 호출(SDK 없음). 20초 타임아웃 × 재시도 1회
+- `OpenAI`(`openai.go`) = **기본 provider**. `net/http` 로 Chat Completions 직접 호출.
+  system을 첫 메시지(role:"system")로 넣음.
+- `Anthropic`(`client.go`) = 대체 provider. Messages API(system은 별도 필드).
+- 둘 다 SDK 없이 표준 라이브러리. 20초 타임아웃 × 재시도 1회. `main.go` 가 `LLM_PROVIDER` 로 선택.
 - `Fake` = 테스트용. 정한 문자열 반환 + 호출 인자 기록
 
 > 외부 호출을 인터페이스 뒤에 숨겨 테스트에선 Fake로 교체. 실제 API를 때리는 테스트는 없다(비용·불안정).
+> **provider를 갈아끼울 수 있는 게 이 seam의 값어치** — OpenAI↔Anthropic 전환이 한 줄.
 > Go 인터페이스 기반 DI ≈ 자바 생성자 주입 + Mockito.
 
 ## 3. 파싱 방어 — `internal/jsonx/jsonx.go`

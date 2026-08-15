@@ -17,8 +17,10 @@
 |---|---|---|---|
 | `PORT` | `8080` | X | 바인드 포트(이미지에 8080 설정됨) |
 | `HOST` | (전체) | X | 비우면 모든 인터페이스 — 컨테이너 기본 |
-| `ANTHROPIC_API_KEY` | — | **O(실사용)** | 없으면 `/api/chat` 만 503, 서버는 기동 |
-| `MODEL` | `claude-haiku-4-5-20251001` | X | 파싱 준수율 나쁘면 상위 모델로 |
+| `LLM_PROVIDER` | `openai` | X | `openai` \| `anthropic`. 프롬프트가 GPT-4o 튜닝이라 기본 openai |
+| `OPENAI_API_KEY` | — | **O(openai)** | 없으면 `/api/chat` 만 503, 서버는 기동 |
+| `ANTHROPIC_API_KEY` | — | O(anthropic) | provider=anthropic일 때 |
+| `MODEL` | provider별 | X | openai→`gpt-4o`, anthropic→`claude-haiku-4-5-20251001` |
 | `ALLOWED_ORIGIN` | `*` | **O(프로덕션)** | 실제 프론트 오리진. `*` 금지 |
 | `PROMPTS_DIR` | `/prompts` | X | 이미지가 `/prompts` 로 설정 |
 
@@ -93,10 +95,10 @@ docker pull ghcr.io/joseng8908/girugi:latest        # private면 먼저 docker l
 
 docker run -d --name girugi --restart unless-stopped \
   -p 8080:8080 \
-  -e ANTHROPIC_API_KEY=sk-ant-... \
+  -e OPENAI_API_KEY=sk-... \
   -e ALLOWED_ORIGIN=https://your-frontend.vercel.app \
-  -e MODEL=claude-haiku-4-5-20251001 \
   ghcr.io/joseng8908/girugi:latest
+# Anthropic로 전환: -e LLM_PROVIDER=anthropic -e ANTHROPIC_API_KEY=sk-ant-...
 
 # 포트만 바꾸려면 (이미지 재빌드 X)
 #   -e PORT=9000 -p 9000:9000
@@ -136,7 +138,7 @@ docker compose logs -f girugi
 **시크릿**
 ```bash
 kubectl create secret generic girugi-secret \
-  --from-literal=ANTHROPIC_API_KEY=sk-ant-...
+  --from-literal=OPENAI_API_KEY=sk-...
 ```
 
 **Deployment + Service** (`k8s/girugi.yaml`)
@@ -161,9 +163,9 @@ spec:
           env:
             - name: ALLOWED_ORIGIN
               value: "https://your-frontend.vercel.app"
-            - name: ANTHROPIC_API_KEY
+            - name: OPENAI_API_KEY
               valueFrom:
-                secretKeyRef: { name: girugi-secret, key: ANTHROPIC_API_KEY }
+                secretKeyRef: { name: girugi-secret, key: OPENAI_API_KEY }
           readinessProbe:
             httpGet: { path: /healthz, port: 8080 }
             initialDelaySeconds: 2
