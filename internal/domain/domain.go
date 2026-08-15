@@ -81,3 +81,47 @@ func FilterDisclose(scenario, persona string, keys []string) []string {
 	}
 	return out
 }
+
+// FindingCodes is the reference whitelist of report finding codes per scenario
+// (API.md). Used for observability: /api/report logs unknown codes but does not
+// reject them — the report must always render (issue #10, BACKEND_SPEC §5).
+var FindingCodes = map[string][]string{
+	ScenarioCMF: {
+		"asked_capability_before_final", "vendor_compared_three",
+		"limit_sample_missing_in_draft", "spec_field_missing", "vendor_criteria_incomplete",
+		"revisited_after_branch", "concept_abandoned",
+		"capability_never_asked", "budget_never_asked", "deadline_margin_ignored",
+	},
+	ScenarioPrototype: {
+		"manufacturing_method_considered", "cost_alternative_provided", "core_intent_kept",
+		"alternative_proposed_to_engineering", "agreement_confirmed",
+		"cost_alternative_missing", "core_intent_abandoned", "design_unilaterally_insisted",
+		"agreement_deferred", "revisited_to_senior",
+		"reasoning_missing_round1", "reasoning_missing_round2",
+	},
+}
+
+// ValidFindingCode reports whether code is a known finding code for scenario.
+func ValidFindingCode(scenario, code string) bool {
+	return slices.Contains(FindingCodes[scenario], code)
+}
+
+// IntentValues is reference-only (API.md). The server does NOT validate intent —
+// it is passed through and only set to "unknown" on parse fallback (§4). Kept as
+// a single source of truth for the frontend/tests, not enforced in code.
+var IntentValues = map[string]map[string][]string{
+	ScenarioCMF: {
+		PersonaSenior:      {"spec_guidance", "vendor_guidance"},
+		PersonaEngineering: {"manufacturing_capability"},
+		PersonaPurchasing:  {"cost_constraint"},
+		PersonaDesign:      {"concept_feedback", "material_intent_guidance"},
+	},
+	ScenarioPrototype: {
+		PersonaEngineering: {"round1_feedback", "round2_feedback", "round3_feedback", "manufacturing_capability"},
+		PersonaSenior:      {"design_guidance", "revisit_review"},
+		PersonaDesign:      {"concept_feedback", "user_perspective"},
+	},
+}
+
+// CommonIntents apply to every persona (guardrail responses + fallback).
+var CommonIntents = []string{"out_of_scope", "too_vague", "irrelevant", "other", "unknown"}

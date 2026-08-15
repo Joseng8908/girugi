@@ -99,6 +99,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Unknown finding codes are logged but not rejected — the report must always
+	// render (issue #10, BACKEND_SPEC §5).
+	logUnknownFindings(req)
+
 	if req.Scenario == domain.ScenarioPrototype {
 		httpx.WriteJSON(w, http.StatusOK, h.completeS1(r, req))
 		return
@@ -160,6 +164,22 @@ func (h *Handler) complete(r *http.Request, promptName string, req request) (str
 func mustJSON(req request) string {
 	b, _ := json.Marshal(req)
 	return string(b)
+}
+
+// logUnknownFindings warns on finding codes not in the reference whitelist so a
+// frontend typo / undefined code is not lost silently (issue #10).
+func logUnknownFindings(req request) {
+	check := func(bucket string, fs []Finding) {
+		for _, f := range fs {
+			if !domain.ValidFindingCode(req.Scenario, f.Code) {
+				slog.Warn("report: unknown finding code (kept, not rejected)",
+					"scenario", req.Scenario, "bucket", bucket, "code", f.Code)
+			}
+		}
+	}
+	check("strengths", req.StrengthsFindings)
+	check("cautions", req.CautionsFindings)
+	check("missed", req.MissedFindings)
 }
 
 func capN(s []string, n int) []string {

@@ -259,6 +259,13 @@ type SelfEval struct {
 세션1은 finding 문장을 조합할 수 없으므로 `_s1_default` 를 그대로 반환한다.
 **리포트는 마지막 화면이므로 절대 비어서는 안 된다.**
 
+> **finding code / intent 검증 정책 (issue #10).**
+> - **finding code**: 정의되지 않은 code(= `domain.FindingCodes` 및 `fallback.json` 에 없음)는
+>   400이 아니라 **`slog.Warn` 로깅 후 스킵**한다. 리포트는 항상 렌더링돼야 하므로 계약 위반
+>   때문에 화면을 비우지 않는다. 참조용 화이트리스트는 `domain.FindingCodes`(API.md 기준).
+> - **intent**: 서버는 검증하지 않고 그대로 통과시킨다(§4). 참고용이며 폴백 시에만 `"unknown"`.
+>   이는 누락이 아니라 **의도된 설계**다. 참조 enum은 `domain.IntentValues`.
+
 ---
 
 ## 6. JSON 파싱 — `internal/jsonx`
@@ -292,7 +299,9 @@ payload를 검증하지 않는다. 실패해도 200을 반환한다.
 
 ## 8. LLM 클라이언트
 
-Anthropic Messages API를 표준 `net/http` 로 직접 호출. SDK 금지.
+`Client` 인터페이스 뒤에 provider 구현체. 표준 `net/http` 직접 호출, SDK 금지.
+**기본 provider는 OpenAI(GPT-4o)** — AI 파트 프롬프트가 GPT-4o 기준으로 튜닝·검증됐다.
+Anthropic 구현체도 유지하며 `LLM_PROVIDER` env로 전환한다. (전환 = 한 줄)
 
 ```go
 type Client interface {
@@ -303,18 +312,24 @@ type Message struct {
 }
 ```
 
+OpenAI (기본, `internal/llm/openai.go`):
+```
+POST https://api.openai.com/v1/chat/completions   # OPENAI_BASE_URL 로 override 가능(프록시/게이트웨이)
+Authorization: Bearer {OPENAI_API_KEY}
+{"model":"{MODEL}","max_tokens":1024,"messages":[{"role":"system",...}, ...]}
+```
+응답 `choices[0].message.content` 반환. **system은 별도 필드가 아니라 첫 메시지(role:"system")로 넣는다.**
+
+Anthropic (`LLM_PROVIDER=anthropic`, `internal/llm/client.go`):
 ```
 POST https://api.anthropic.com/v1/messages
 x-api-key: {ANTHROPIC_API_KEY} · anthropic-version: 2023-06-01
 {"model":"{MODEL}","max_tokens":1024,"system":"...","messages":[...]}
 ```
-
 응답 `content[0].text` 반환.
 
-> **모델 전환 리스크.** AI 파트 프롬프트는 **OpenAI GPT-4o 기준**으로 튜닝·검증됐다.
-> Anthropic 모델로 바꾸면 JSON 형식 준수율과 톤이 달라질 수 있다.
-> Step 1 완료 직후 페르소나별 10회 호출해 파싱 실패율을 측정하고,
-> 실패가 반복되면 `MODEL` 환경변수만 상위 모델로 올린다.
+> 두 provider 모두 20초 타임아웃 × 재시도 1회. 프롬프트가 GPT-4o 튜닝이라 기본은 OpenAI.
+> Anthropic으로 바꾸면 JSON 준수율·톤이 달라질 수 있으니 `MODEL` 조정으로 대응한다.
 
 ---
 
@@ -323,8 +338,11 @@ x-api-key: {ANTHROPIC_API_KEY} · anthropic-version: 2023-06-01
 | 변수 | 기본 | 필수 |
 |---|---|---|
 | `PORT` | 8080 | X |
-| `ANTHROPIC_API_KEY` | — | X (없으면 LLM만 503) |
-| `MODEL` | `claude-haiku-4-5-20251001` | X |
+| `LLM_PROVIDER` | `openai` | X (`openai`\|`anthropic`) |
+| `OPENAI_API_KEY` | — | O(openai, 없으면 LLM만 503) |
+| `OPENAI_BASE_URL` | (공식 API) | X (커스텀 OpenAI 호환 엔드포인트) |
+| `ANTHROPIC_API_KEY` | — | O(anthropic) |
+| `MODEL` | provider별(openai→`gpt-4o`, anthropic→`claude-haiku-4-5-20251001`) | X |
 | `ALLOWED_ORIGIN` | — | O |
 | `PROMPTS_DIR` | `./prompts` | X |
 
@@ -354,7 +372,7 @@ ENTRYPOINT ["/app"]
 ## 10. 수용 기준
 
 1. `go vet ./...` · `go test ./...` 통과
-2. `ANTHROPIC_API_KEY` 없이 기동, `/healthz` 200 (LLM 호출만 503)
+2. provider API 키(`OPENAI_API_KEY`) 없이 기동, `/healthz` 200 (LLM 호출만 503)
 3. Fake 클라이언트 기준:
    - 정상 JSON / 코드펜스 / **JSON 앞 평문 접두사** → 모두 파싱 성공
    - 완전 파손 → 폴백, **200** 반환
