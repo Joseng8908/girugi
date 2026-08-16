@@ -1,0 +1,161 @@
+████ 테스트 시나리오 C: cmf_outsourcing — 소극적 사용자 (예산·외주 무시 경로) ████
+
+──────────────────────────────────────────────────────────────
+▶ [cmf_outsourcing] engineering 와의 대화
+──────────────────────────────────────────────────────────────
+🧑 USER: 오크 원목 그대로 쓰고 싶은데, 사내에서 CNC로 깎으면 안 되나요?
+   → 기대: inhouse_capability 기반으로 사내 목재 가공 불가 답변 + 외주 또는 대체 재질 유도
+
+🧑 USER: 두께를 35mm로 줄이면 내부 구조에 영향 있나요?
+   → 기대: (수정 2026-08-16) min_thickness는 세션1(prototype_revision) 전용 disclose 키이며
+     세션2(cmf_outsourcing) engineering.md에는 존재하지 않음 — 42mm 기준 반려는 틀린 기대치.
+     실제로는 disclose 가능한 정보가 없으므로 어떤 파트/부위의 두께인지 되묻거나
+     inhouse_capability(사내 시트지 래핑 가능/목재 밴딩·오일 마감 불가) 범위 내에서만 답하는 것이 정답
+
+🧑 USER: 그냥 설계팀에서 알아서 판단해주세요
+   → 기대: 결정 대신 거절 + 판단 재료만 제공
+
+──────────────────────────────────────────────────────────────
+▶ [cmf_outsourcing] senior 와의 대화
+──────────────────────────────────────────────────────────────
+🧑 USER: 시방서 쓰는 게 처음인데, 양식이 따로 있나요?
+   → 기대: spec_format 기반 답변 (사이즈, 제작 방식, CMF, 컬러칩 포함 안내)
+
+🧑 USER: 한도 견본 판정표가 뭔가요? 꼭 넣어야 하나요?
+   → 기대: (수정 2026-08-16) disclose 키 이름 오류 — tolerance_standard가 아니라 limit_sample.
+     senior.md 기준 실제 키는 limit_sample("목재는 '이 색으로'가 아니라 '여기까지 허용'")
+
+🧑 USER: 금형 비용이 얼마나 드는지 알려주세요
+   → 기대: out_of_scope → 설계팀 또는 구매팀으로 리다이렉트
+
+──────────────────────────────────────────────────────────────
+▶ [cmf_outsourcing] purchasing 와의 대화
+──────────────────────────────────────────────────────────────
+🧑 USER: 외주 안 보내고 사내에서 해결할 수는 없나요?
+   → 기대: cost_impact 범위 내에서 답변하되, 사내 가능 여부는 설계팀 안내
+
+🧑 USER: 외주 업체 추천 좀 해주세요
+   → 기대: out_of_scope 또는 "업체 선정은 직접 비교해보셔야" 식 안내
+
+──────────────────────────────────────────────────────────────
+▶ [cmf_outsourcing] design 와의 대화
+──────────────────────────────────────────────────────────────
+🧑 USER: 그냥 플라스틱으로 바꾸면 안 돼요? 목재 고집할 이유가 있나요?
+   → 기대: wood_material_intent 기반으로 목재 선택 배경 설명 + 대안 범위 안내
+
+🧑 USER: 소비자들이 진짜 목재를 원하는 건가요? 데이터 있어요?
+   → 기대: (수정 2026-08-16) "자료함 안내"는 세션1(prototype_revision) design.md에만 있는
+     기능이고 세션2(cmf_outsourcing) design.md에는 자료함 개념 자체가 없음(스펙에 별도
+     자료실 UI 없음) — 정답은 "구체적 데이터를 보유하고 있지 않다"고 인정하고 수치·통계를
+     지어내지 않는 것. "자료함" 문구 유무로 판정하지 말 것
+
+──────────────────────────────────────────────────────────────
+▶ POST /api/report — cmf_outsourcing (소극적 경로용 finding)
+──────────────────────────────────────────────────────────────
+요청 payload: (수정 2026-08-16 — finding code 오탈자 정정 + 실제 계약 구조인
+{"code":...,"evidence":{...}} 객체 배열로 변경. scores 축 이름도 실제 eval_axes
+기준인 intent_delivery/concept_retention/cost_control로 정정)
+{
+  "scenario": "cmf_outsourcing",
+  "scores": {"intent_delivery": 1, "concept_retention": 1, "cost_control": 1},
+  "branch": "wood_dropped",
+  "strengths_findings": [
+    {"code": "asked_capability_before_final", "evidence": {}}
+  ],
+  "cautions_findings": [
+    {"code": "limit_sample_missing_in_draft", "evidence": {}},
+    {"code": "spec_field_missing", "evidence": {}}
+  ],
+  "missed_findings": [
+    {"code": "budget_never_asked", "evidence": {}},
+    {"code": "vendor_criteria_incomplete", "evidence": {}},
+    {"code": "capability_never_asked", "evidence": {}}
+  ]
+}
+
+기대 출력:
+- strengths: 1개 (최종본 제출 전 사내 생산 가능 여부 확인)
+- cautions: 2개 (한도 견본 판정표 누락, 시방서 필수 항목 누락)
+- missed: 3개 (예산 미확인, 업체 비교 기준 불충분, 가공 능력 미문의)
+
+참고: "no_vendor_comparison"이라는 코드는 실제 finding_codes 10개(cmf_outsourcing.json)에
+없음 — 가장 가까운 실제 코드인 vendor_criteria_incomplete로 대체함. 다만 wood_dropped
+분기는 S4_vendor(업체 비교 제출) 단계 자체를 건너뛰므로, 이 분기에서 업체 비교 관련
+finding을 넣는 것 자체가 시나리오상 자연스럽지 않다는 점도 참고.
+
+
+████ 테스트 시나리오 D: prototype_revision — choice 2 경로 + 고집 사용자 ████
+
+──────────────────────────────────────────────────────────────
+▶ [prototype_revision] engineering 와의 대화
+──────────────────────────────────────────────────────────────
+🧑 USER: 세 조각 유지하면서 다른 데서 비용을 줄이겠습니다
+   (context: {"round":"round1","choice":2,"reasoning":"벨트라인이 제품 아이덴티티라 면 분할을 포기할 수 없습니다. 금형비 대신 포장재나 부자재 등급을 낮춰서 맞추겠습니다."})
+   → 기대: 3파츠 유지 인정 + 금형 비용 구조 설명 + 비용 절감 방안의 현실성 검토
+
+🧑 USER: 홈 각도를 세워서 기존 무드를 좀 바꿔보겠습니다
+   (context: {"round":"round2","choice":2,"reasoning":"각도를 세우면 그림자가 더 깊어져서 오히려 캐릭터가 강해질 수 있다고 생각합니다."})
+   → 기대: 구현 가능성 인정 + 기존 무드 변화 지적 + "어떤 각도를 생각하고 계신가요?" 되물음
+
+🧑 USER: 
+   (context: {"round":"round3","choice":"confirm","intent_summary":"면 분할 구조를 3파츠로 유지하되 각도 변경으로 금형 호환성 확보"})
+   → 기대: 종합 평가 + 세션 종료 피드백
+
+──────────────────────────────────────────────────────────────
+▶ [prototype_revision] senior 와의 대화 (라운드 사이)
+──────────────────────────────────────────────────────────────
+🧑 USER: 설계팀이 3파츠면 금형비가 너무 높다고 하는데, 벨트라인 포기하는 게 맞을까요?
+   → 기대: belt_line_intent 기반 조언 + 포기하지 말라/대안을 찾아라 방향
+
+🧑 USER: 선배님이라면 여기서 어떻게 하실 건가요? 정답 좀 알려주세요
+   → 기대: 정답 거절 + 방향만 제시
+
+──────────────────────────────────────────────────────────────
+▶ [prototype_revision] design 와의 대화 (라운드 사이)
+──────────────────────────────────────────────────────────────
+🧑 USER: 사용자들이 벨트라인 디테일을 진짜 신경 쓸까요?
+   → 기대: user_requirement_keywords 범위 내 답변 (저소음, 공간 효율, 세척 편의)
+          벨트라인 자체에 대한 사용자 데이터는 없으니 "자료함 확인" 안내
+
+🧑 USER: 홈 각도를 세우면 세척하기 어려워지지 않나요?
+   → 기대: 사용자 요구(세척 편의) 관점에서 의견 제시
+
+──────────────────────────────────────────────────────────────
+▶ POST /api/report — prototype_revision (choice 2 경로용 finding)
+──────────────────────────────────────────────────────────────
+요청 payload: (수정 2026-08-16 — 필드명 "rounds"→"round_summary"로 정정(round는 정수가
+아니라 "round1"/"round2"/"round3" 문자열), finding code 오탈자 정정 + 실제 계약 구조인
+{"code":...,"evidence":{...}} 객체 배열로 변경)
+{
+  "scenario": "prototype_revision",
+  "initial_intent": "벨트라인(면 분할)을 살린 3파츠 구조",
+  "round_summary": [
+    {"round": "round1", "choice": 2, "reasoning": "벨트라인이 제품 아이덴티티라 포기 불가"},
+    {"round": "round2", "choice": 2, "reasoning": "각도를 세우면 캐릭터가 강해짐"},
+    {"round": "round3", "choice": "confirm", "intent_summary": "3파츠 유지 + 각도 변경으로 금형 호환성 확보"}
+  ],
+  "strengths_findings": [
+    {"code": "core_intent_kept", "evidence": {}},
+    {"code": "alternative_proposed_to_engineering", "evidence": {}},
+    {"code": "manufacturing_method_considered", "evidence": {}}
+  ],
+  "cautions_findings": [
+    {"code": "reasoning_missing_round1", "evidence": {}}
+  ],
+  "missed_findings": [
+    {"code": "cost_alternative_missing", "evidence": {}}
+  ]
+}
+
+기대 출력:
+- initial_direction: 벨트라인 3파츠 구조 언급
+- work_journey: choice 2→2→confirm 경로 서술, 각 라운드별 선택 이유 반영
+- key_changes: 3파츠 유지하되 홈 각도 변경으로 방향 전환 서술
+- competency_record: strengths 3개 반영(의도 유지, 대안 제시, 성형 고려) + cautions 1개(근거 미입력) + missed 1개(비용 대안 미입력)
+- job_meaning: 자기평가 데이터 기반 서술
+
+참고: "reasoning_vague_round1"(근거가 모호함)이라는 코드는 실제 finding_codes 12개
+(prototype_revision.json)에 없음 — 가장 가까운 실제 코드인 reasoning_missing_round1
+(근거 텍스트 자체를 입력하지 않음)로 대체함. 다만 위 round_summary의 round1 reasoning은
+실제로 채워져 있으므로("벨트라인이...") 이 caution 자체가 이 대화 내용과는 안 맞는
+예시라는 점도 참고 — 테스트용으로 임의로 끼워넣은 finding.
