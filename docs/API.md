@@ -146,9 +146,11 @@ LLM/파싱 실패 시에도 **항상 200 + 고정 문장** (리포트는 마지�
 ### 응답 200 — 세션2 `cmf_outsourcing`
 
 ```json
-{ "strengths": ["..."], "cautions": ["..."], "missed": ["..."] }
+{ "work_overview": "...", "strengths": ["..."], "cautions": ["..."], "missed": ["..."], "job_meaning": "..." }
 ```
-상한 strengths 2 / cautions 2 / missed 3, 각 60자 이내, 숫자 미포함. 빈 배열 가능.
+- `work_overview` — 이번에 경험한 업무 요약(와이어프레임 ①). 항상 채워짐
+- `strengths`/`cautions`/`missed` — 상한 2 / 2 / 3, 각 60자 이내, 숫자 미포함. 빈 배열 가능
+- `job_meaning` — 직무에서의 의미(와이어프레임 ⑥). 항상 채워짐
 
 ### 응답 200 — 세션1 `prototype_revision`
 

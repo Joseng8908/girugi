@@ -34,6 +34,10 @@ func testFallback() *Fallback {
 			CompetencyRecord: "기본 역량",
 			JobMeaning:       "기본 의미",
 		},
+		S2Default: s2Default{
+			WorkOverview: "기본 업무 개요",
+			JobMeaning:   "기본 직무 의미",
+		},
 	}
 }
 
@@ -45,8 +49,8 @@ func do(h *Handler, body string) *httptest.ResponseRecorder {
 }
 
 func TestReportSession2(t *testing.T) {
-	t.Run("parse success caps arrays", func(t *testing.T) {
-		fake := &llm.Fake{Reply: `{"strengths":["a","b","c"],"cautions":["x"],"missed":["m1","m2","m3","m4"]}`}
+	t.Run("parse success caps arrays and passes work_overview/job_meaning", func(t *testing.T) {
+		fake := &llm.Fake{Reply: `{"work_overview":"CMF 업무","strengths":["a","b","c"],"cautions":["x"],"missed":["m1","m2","m3","m4"],"job_meaning":"실무 의미"}`}
 		h := &Handler{LLM: fake, Prompts: fakePrompt{}, Fallback: testFallback()}
 		rec := do(h, `{"scenario":"cmf_outsourcing"}`)
 		if rec.Code != 200 {
@@ -56,6 +60,20 @@ func TestReportSession2(t *testing.T) {
 		json.Unmarshal(rec.Body.Bytes(), &out)
 		if len(out.Strengths) != 2 || len(out.Cautions) != 1 || len(out.Missed) != 3 {
 			t.Fatalf("caps wrong: %+v", out)
+		}
+		if out.WorkOverview != "CMF 업무" || out.JobMeaning != "실무 의미" {
+			t.Fatalf("new fields not passed through: %+v", out)
+		}
+	})
+
+	t.Run("empty work_overview/job_meaning backfilled from default", func(t *testing.T) {
+		fake := &llm.Fake{Reply: `{"strengths":[],"cautions":[],"missed":[]}`} // model omitted the two string fields
+		h := &Handler{LLM: fake, Prompts: fakePrompt{}, Fallback: testFallback()}
+		rec := do(h, `{"scenario":"cmf_outsourcing"}`)
+		var out resS2
+		json.Unmarshal(rec.Body.Bytes(), &out)
+		if out.WorkOverview != "기본 업무 개요" || out.JobMeaning != "기본 직무 의미" {
+			t.Fatalf("expected backfill, got %+v", out)
 		}
 	})
 
@@ -87,6 +105,9 @@ func TestReportSession2(t *testing.T) {
 		json.Unmarshal(rec.Body.Bytes(), &out)
 		if len(out.Strengths) != 1 || out.Strengths[0] != "사전 확인함" {
 			t.Fatalf("expected fallback strength, got %+v", out)
+		}
+		if out.WorkOverview != "기본 업무 개요" || out.JobMeaning != "기본 직무 의미" {
+			t.Fatalf("expected fallback work_overview/job_meaning, got %+v", out)
 		}
 	})
 

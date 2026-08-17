@@ -72,11 +72,14 @@ type request struct {
 	SelfEval           *SelfEval    `json:"self_eval"`
 }
 
-// resS2 — session 2 (cmf_outsourcing): three sentence buckets.
+// resS2 — session 2 (cmf_outsourcing): work overview + three sentence buckets +
+// job meaning (wireframe sections 1/3/4/6; issue #14).
 type resS2 struct {
-	Strengths []string `json:"strengths"`
-	Cautions  []string `json:"cautions"`
-	Missed    []string `json:"missed"`
+	WorkOverview string   `json:"work_overview"`
+	Strengths    []string `json:"strengths"`
+	Cautions     []string `json:"cautions"`
+	Missed       []string `json:"missed"`
+	JobMeaning   string   `json:"job_meaning"`
 }
 
 // resS1 — session 1 (prototype_revision): five narrative sections.
@@ -126,6 +129,14 @@ func (h *Handler) completeS2(r *http.Request, req request) resS2 {
 	if err := json.Unmarshal([]byte(jsonx.Extract(raw)), &out); err != nil {
 		slog.Warn("report parse fallback", "scenario", req.Scenario)
 		return h.Fallback.forS2(req)
+	}
+	// work_overview / job_meaning must never be blank (they are their own report
+	// sections); backfill from the fixed defaults if the model omitted them.
+	if out.WorkOverview == "" {
+		out.WorkOverview = h.Fallback.S2Default.WorkOverview
+	}
+	if out.JobMeaning == "" {
+		out.JobMeaning = h.Fallback.S2Default.JobMeaning
 	}
 	return out
 }

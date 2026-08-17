@@ -235,8 +235,9 @@ type SelfEval struct {
 
 ### 응답
 
-**세션2** — `{"strengths":[],"cautions":[],"missed":[]}`
-상한 2/2/3, 문장 60자 이내, 숫자 미포함.
+**세션2** — `{"work_overview","strengths":[],"cautions":[],"missed":[],"job_meaning"}`
+strengths/cautions/missed 상한 2/2/3, 문장 60자 이내, 숫자 미포함.
+`work_overview`(①)·`job_meaning`(⑥)은 서술 문자열, 항상 채움(빈 값이면 `_s2_default`로 백필). 이슈 #14.
 
 **세션1** — `{"initial_direction","work_journey","key_changes","competency_record","job_meaning"}`
 각 2~4문장 서술형, 점수·등급 미포함(라운드 서수는 허용).

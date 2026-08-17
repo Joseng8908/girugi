@@ -15,6 +15,15 @@ type Fallback struct {
 	Sentences map[string]string
 	// S1Default is the whole session-1 narrative fallback (_s1_default).
 	S1Default resS1
+	// S2Default holds the session-2 work_overview / job_meaning fallbacks
+	// (_s2_default) — these are their own report sections and are not built from
+	// finding codes (issue #14).
+	S2Default s2Default
+}
+
+type s2Default struct {
+	WorkOverview string `json:"work_overview"`
+	JobMeaning   string `json:"job_meaning"`
 }
 
 // LoadFallback reads prompts/fallback.json. On error it returns an empty (but
@@ -30,8 +39,12 @@ func LoadFallback(dir string) (*Fallback, error) {
 		return fb, fmt.Errorf("report: parse fallback.json: %w", err)
 	}
 	for k, v := range raw {
-		if k == "_s1_default" {
+		switch k {
+		case "_s1_default":
 			_ = json.Unmarshal(v, &fb.S1Default)
+			continue
+		case "_s2_default":
+			_ = json.Unmarshal(v, &fb.S2Default)
 			continue
 		}
 		var s string
@@ -46,9 +59,11 @@ func LoadFallback(dir string) (*Fallback, error) {
 // caps (spec §5: 2/2/3).
 func (f *Fallback) forS2(req request) resS2 {
 	return resS2{
-		Strengths: f.sentencesFor(req.StrengthsFindings, 2),
-		Cautions:  f.sentencesFor(req.CautionsFindings, 2),
-		Missed:    f.sentencesFor(req.MissedFindings, 3),
+		WorkOverview: f.S2Default.WorkOverview,
+		Strengths:    f.sentencesFor(req.StrengthsFindings, 2),
+		Cautions:     f.sentencesFor(req.CautionsFindings, 2),
+		Missed:       f.sentencesFor(req.MissedFindings, 3),
+		JobMeaning:   f.S2Default.JobMeaning,
 	}
 }
 
