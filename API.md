@@ -147,6 +147,9 @@ Base URL: `https://TODO` (배포 후 갱신) · 로컬 `http://localhost:8080`
 | `senior` | `spec_format` | 시방서 작성 기준 |
 | `senior` | `limit_sample` | 한도 견본 판정표 |
 | `senior` | `vendor_criteria` | 업체 선정 기준 (납기·수량·단가) |
+| `senior` | `product_concept` | 제품 콘셉트 (거실 오브제·가구 스타일 공기청정기) |
+| `senior` | `design_direction` | 디자인 방향 (가전을 가구의 언어로) |
+| `senior` | `cmf_spec` | CMF 상세 (하우징 알루미늄·벤트홀 오크·스트랩 소가죽) |
 | `engineering` | `inhouse_capability` | 시트지 가능 / 목재 밴딩·오일 마감 불가 |
 | `engineering` | `sheet_lead_time` | 시트지 소요 기간 |
 | `purchasing` | `budget_limit` | 목재 파트 예산 상한 ※ 금액 미확정 |

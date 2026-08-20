@@ -30,7 +30,7 @@ var ScenarioPersonas = map[string][]string{
 // frontend's document-unlock mapping never receives an unknown key.
 var DiscloseKeys = map[string]map[string][]string{
 	ScenarioCMF: {
-		PersonaSenior:      {"spec_format", "limit_sample", "vendor_criteria"},
+		PersonaSenior:      {"spec_format", "limit_sample", "vendor_criteria", "product_concept", "design_direction", "cmf_spec"},
 		PersonaEngineering: {"inhouse_capability", "sheet_lead_time"},
 		PersonaPurchasing:  {"budget_limit", "cost_impact", "part_cost_share"},
 		PersonaDesign:      {"wood_material_intent", "concept_consistency_criteria", "cmf_alternative_range"},
@@ -111,7 +111,7 @@ func ValidFindingCode(scenario, code string) bool {
 // a single source of truth for the frontend/tests, not enforced in code.
 var IntentValues = map[string]map[string][]string{
 	ScenarioCMF: {
-		PersonaSenior:      {"spec_guidance", "vendor_guidance"},
+		PersonaSenior:      {"spec_guidance", "vendor_guidance", "concept_guidance"},
 		PersonaEngineering: {"manufacturing_capability"},
 		PersonaPurchasing:  {"cost_constraint"},
 		PersonaDesign:      {"concept_feedback", "material_intent_guidance"},

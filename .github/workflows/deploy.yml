@@ -1,0 +1,42 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - run: go vet ./...
+      - run: go test ./...
+
+  deploy:
+    needs: test
+    # main 브랜치 push에서만 배포 (PR에서는 test만)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server (pull + rebuild container)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -e
+            cd ~/girugi
+            git fetch origin
+            git reset --hard origin/main
+            sudo docker build -t girugi:latest .
+            sudo docker rm -f girugi 2>/dev/null || true
+            sudo docker run -d --name girugi --restart unless-stopped \
+              -p 127.0.0.1:8080:8080 --env-file ~/girugi.env girugi:latest
+            sleep 3
+            curl -sf localhost:8080/healthz && echo "deploy healthy ✅"

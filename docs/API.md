@@ -104,7 +104,7 @@ AI 파트 검증 포맷의 JSON으로 조립해 LLM에 전달합니다 — **프
 
 | persona | 키 |
 |---|---|
-| `senior` | `spec_format` `limit_sample` `vendor_criteria` |
+| `senior` | `spec_format` `limit_sample` `vendor_criteria` `product_concept` `design_direction` `cmf_spec` |
 | `engineering` | `inhouse_capability` `sheet_lead_time` |
 | `purchasing` | `budget_limit` `cost_impact` `part_cost_share` |
 | `design` | `wood_material_intent` `concept_consistency_criteria` `cmf_alternative_range` |

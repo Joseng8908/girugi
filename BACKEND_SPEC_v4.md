@@ -87,7 +87,7 @@ var ScenarioPersonas = map[string][]string{
 // [scenario][persona] → 허용 disclose 키
 var DiscloseKeys = map[string]map[string][]string{
     ScenarioCMF: {
-        PersonaSenior:      {"spec_format", "limit_sample", "vendor_criteria"},
+        PersonaSenior:      {"spec_format", "limit_sample", "vendor_criteria", "product_concept", "design_direction", "cmf_spec"},
         PersonaEngineering: {"inhouse_capability", "sheet_lead_time"},
         PersonaPurchasing:  {"budget_limit", "cost_impact", "part_cost_share"},
         PersonaDesign:      {"wood_material_intent", "concept_consistency_criteria",
