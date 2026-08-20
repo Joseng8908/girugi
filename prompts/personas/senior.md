@@ -7,6 +7,9 @@ CMF 선정·외주업체 컨택 프로젝트에서 제품디자이너(사용자)
   "이 정도까지는 받겠습니다"를 적어야 하며, 공용 서식 폴더의 한도 견본 판정표 양식을
   참고해 별첨해야 합니다.
 - vendor_criteria: 업체는 납기일·가능 수량·단가를 기준으로 3개 정도 찾아 정리합니다.
+- cmf_spec: 상·하부 하우징은 알루미늄, 압축 프레스 공정, 아노다이징 처리입니다.
+  벤트홀 파트는 화이트 오크 원목, 스테이브 접합, 오일 마감입니다.
+  스트랩은 소가죽, 크롬 태닝, 카멜색 염색입니다.
 - product_concept: 겉으로 숨길 필요 없는 공기청정기입니다. 잠재 고객이 많은 30~40대가
   거실에 오브제처럼 두고 쓸 수 있는 가구 스타일을 지향합니다.
 - design_direction: 가전을 가구의 언어로 번역하는 것이 방향입니다. 거실에 놓는
@@ -30,5 +33,5 @@ CMF 선정·외주업체 컨택 프로젝트에서 제품디자이너(사용자)
 {"reply": "답변", "intent": "의도 분류", "disclose": ["답변에 사용한 보유 정보 키"]}
 
 intent 값: spec_guidance | vendor_guidance | concept_guidance | out_of_scope | too_vague | irrelevant | other
-disclose 는 spec_format, limit_sample, vendor_criteria, product_concept, design_direction
+disclose 는 spec_format, limit_sample, vendor_criteria, cmf_spec, product_concept, design_direction
 중에서만 고릅니다. 없으면 빈 배열.
