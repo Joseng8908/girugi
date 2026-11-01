@@ -1,15 +1,15 @@
 {
-  "_note": "AI/기획 확정 완료. code는 API.md finding 표와 1:1 — code 이름은 백엔드 폴백 조회 키이므로 절대 변경하지 말 것. 문구만 필요 시 이 파일에서 수정.",
+  "_note": "AI/기획 확정. code는 API.md finding 표와 1:1 — code 이름은 백엔드 폴백 조회 키이므로 절대 변경하지 말 것. 문구만 필요 시 이 파일에서 수정. 세션1(prototype_revision) 항목은 이번 개편 범위 밖이라 그대로 둠.",
 
   "asked_capability_before_final": "최종본 제출 전 사내 생산 가능 여부를 확인해 재작업을 줄였습니다.",
-  "vendor_compared_three": "외주 업체 세 곳을 비교해 근거 있는 선정을 진행했습니다.",
+  "limit_sample_attached_in_draft": "초안부터 한도 견본 판정표를 별첨해 기준을 함께 전달했습니다.",
+  "cost_impact_checked": "구매팀에 생산 단가 영향을 확인한 뒤 방향을 정했습니다.",
+  "deadline_margin_considered": "발주까지 남은 일정을 고려해 실현 가능한 방향을 골랐습니다.",
   "limit_sample_missing_in_draft": "초안에 한도 견본 판정표를 별첨하지 않아 재요청이 발생했습니다.",
-  "spec_field_missing": "시방서 필수 항목 중 일부가 빠져 있었습니다.",
+  "spec_field_missing": "시방서 입력 항목 중 일부가 비어 있었습니다.",
   "vendor_criteria_incomplete": "납기·수량·단가 중 일부만 비교해 업체 비교 기준이 다소 부족했습니다.",
-  "revisited_after_branch": "분기 이후 앞 단계로 되돌아가 작업을 다시 진행했습니다.",
-  "concept_abandoned": "목재 소재를 포기하는 방향을 선택했습니다.",
   "capability_never_asked": "설계팀에 사내 생산 가능 여부를 확인하는 것도 추가로 고려할 수 있었습니다.",
-  "budget_never_asked": "구매팀에 예산 상한을 확인하는 것도 비용 측면에서 고려할 수 있었습니다.",
+  "budget_never_asked": "구매팀에 생산 단가 영향을 확인하는 것도 고려할 수 있었습니다.",
   "deadline_margin_ignored": "발주 일정의 여유를 고려하는 것도 추가로 검토할 수 있었습니다.",
 
   "manufacturing_method_considered": "성형 제약을 고려해 제작 가능한 방향으로 선택했습니다.",
@@ -35,6 +35,11 @@
 
   "_s2_default": {
     "work_overview": "CMF 선정과 외주업체 컨택 업무를 수행하며 목재 파트의 실현 방법을 검토했습니다.",
+    "journey": [
+      "부품별 디자인 시방서 초안 작성",
+      "피드백 반영 후 최종본 인계",
+      "목재 파트 양산 방법 검토"
+    ],
     "job_meaning": "자원과 설비 제약 속에서 디자인 의도와 현실적 제약의 타협점을 찾는 경험이었습니다."
   }
 }
